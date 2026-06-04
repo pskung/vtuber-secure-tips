@@ -1,6 +1,6 @@
 # AI Collaboration & Open-Source Integrity Disclosure
 
-The **VTuber Secure Donation Gateway (PDPA-Compliant Model)** is engineered under extreme criteria regarding structural security, data privacy, and ethical compliance. This document declares the collaboration details between Artificial Intelligence (AI) and human engineers in creating this repository.
+The **VTuber Secure Tips (PDPA-Compliant Model)** is engineered under extreme criteria regarding structural security, data privacy, and ethical compliance. This document declares the collaboration details between Artificial Intelligence (AI) and human engineers in creating this repository.
 
 ---
 
