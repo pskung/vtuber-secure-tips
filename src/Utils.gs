@@ -64,7 +64,6 @@ const Utils = {
     const cleanMessage = this.sanitizeLogString(message);
     let cleanInput = "";
 
-    // 🔬 Deep serialization: Extracts stack traces from error objects to guarantee high observability
     if (untrustedInput instanceof Error) {
       cleanInput = this.sanitizeLogString(untrustedInput.stack || untrustedInput.toString());
     } else if (untrustedInput && typeof untrustedInput === 'object') {
