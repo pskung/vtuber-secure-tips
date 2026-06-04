@@ -119,27 +119,6 @@ function saveUserSecrets(payload) {
     CIRCUIT_BREAKER_COOLDOWN_SEC: "30"
   });
   
-  // Reset Config global memory cache to enforce fresh reload
+  // Force Reset of Config global memory cache to enforce fresh reload
   Config_ = null;
-}
-
-/**
- * Access point to initialize a secure validation session token.
- */
-function initializeSession(clientFingerprint, clientTimestamp, clientNonce) {
-  return SecurityService.initializeSession(clientFingerprint, clientTimestamp, clientNonce);
-}
-
-/**
- * Access point to verify form data and initialize a PromptPay QR transaction.
- */
-function createPayment(formData) {
-  return PaymentGateway.createPayment(formData);
-}
-
-/**
- * Time-driven trigger execution anchor to prune expired database entries.
- */
-function cleanupExpiredDonations() {
-  return DatabaseService.cleanupExpiredDonations();
 }
