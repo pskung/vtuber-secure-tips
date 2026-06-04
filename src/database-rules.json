@@ -1,1 +1,12 @@
-
+{
+  "rules": {
+    "donations": {
+      ".indexOn": ["created_at"],
+      "$donation_id": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['id', 'nickname', 'amount', 'status', 'created_at']) && newData.child('amount').isNumber() && newData.child('amount').val() >= 1"
+      }
+    }
+  }
+}
