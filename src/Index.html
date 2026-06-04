@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Safe VTuber Donation Gateway (Modular Multi-Page)</title>
+  
+  <!-- 🛡️ Strict Nonce-Based Content Security Policy (Removed 'unsafe-inline' for scripts) -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self' https://*.google.com https://*.googleusercontent.com; 
+                 script-src 'self' 'nonce-secureTipsGatewayNonce' https://*.google.com https://*.googleusercontent.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
+                 style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; 
+                 img-src 'self' data: https:; 
+                 connect-src 'self' https:;
+                 font-src 'self' https://fonts.gstatic.com;">
+  
+  <!-- Client-side sanitization libraries with Integrity (SRI) checks -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js" 
+          integrity="sha512-9+gSreomO9YcaCte0jC7Zg88rSNoeYv0g18mG1mIuY9Zsp8b/PZ80mpx8NNoDlbq7X96s738Ksw7cK7I4V6T0g==" 
+          crossorigin="anonymous" 
+          referrerpolicy="no-referrer"></script>
+  
+  <!-- QR Code styling library secured via Subresource Integrity (SRI) -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"
+          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+          crossorigin="anonymous"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" 
+        integrity="sha512-wnea99cKZTBUeWc5LIT7374wMxgS87XJH8ipTxtcG5YvHdo2DU69Y9Y6Y12U9w5yLg4A3Tdx1C9H+YnSGg==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer" />
+
+  <style>
+    .hidden { display: none !important; }
+    .gjs-spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(52, 211, 153, 0.1);
+      border-top: 4px solid #34d399;
+      border-radius: 50%;
+      animation: gjs-spin-global 0.8s linear infinite;
+    }
+    @keyframes gjs-spin-global {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    *:focus {
+      outline: 2px solid #34d399 !important;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden">
+
+  <!-- Clickjacking Protection -->
+  <script nonce="secureTipsGatewayNonce">
+    (function() {
+      if (window.self !== window.top) {
+        const allowedAncestors = ["sites.google.com", "googleusercontent.com"];
+        try {
+          const parentUrl = document.referrer;
+          const isAllowed = allowedAncestors.some(function(domain) {
+            return parentUrl.includes(domain);
+          });
+          if (!isAllowed) {
+            document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>Security Alert: Direct embedding restricted.</div>";
+          }
+        } catch (e) {
+          document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>Security Alert: Restriction enforced.</div>";
+        }
+      }
+    })();
+  </script>
+
+  <!-- View Section 1: Inputs (Page 1) -->
+  <div id="form-container">
+    <?!= include('src/GrapesJSForm', { dpoEmail: dpoEmail }); ?>
+  </div>
+
+  <!-- Intermediate Loading Screen -->
+  <div id="loading-container" class="hidden">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 16px; gap: 16px; min-height: 80vh;">
+      <div class="gjs-spinner"></div>
+      <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin: 0; font-family: sans-serif; max-width: 300px; line-height: 1.6;">
+        Processing security validation and allocating session window...
+      </p>
+    </div>
+  </div>
+
+  <!-- View Section 2: QR Display (Page 2) -->
+  <div id="qr-container" class="hidden">
+    <?!= include('src/GrapesJSQR'); ?>
+  </div>
+
+  <div id="error-banner" class="hidden" role="alert" aria-live="assertive" tabindex="-1" style="max-width: 440px; margin: 16px auto; padding: 12px; border-radius: 10px; background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.18); color: #fca5a5; font-size: 12px; text-align: center; font-family: sans-serif; outline: none;"></div>
+
+  <script nonce="secureTipsGatewayNonce">
+    let activeSessionToken = "";
+    let isSessionReady = false;
+    
+    // Encodes inputs to contain potential Reflected XSS risks
+    const POW_DIFFICULTY = parseInt("<?= Utils.encodeHtmlEntities(powDifficulty) ?>", 10) || 3;
+
+    function getClientFingerprint() {
+      let fp = localStorage.getItem("client_fp");
+      if (!fp) {
+        const array = new Uint32Array(4);
+        window.crypto.getRandomValues(array);
+        const cryptRandomStr = Array.from(array).map(b => b.toString(36)).join('');
+        fp = "fp_" + cryptRandomStr + "_" + new Date().getTime();
+        localStorage.setItem("client_fp", fp);
+      }
+      return fp;
+    }
+
+    async function solveProofOfWork(fingerprint, timestamp, difficulty = 3) {
+      let nonce = 0;
+      const prefix = "0".repeat(difficulty);
+      const encoder = new TextEncoder();
+      
+      while (true) {
+        const data = encoder.encode(fingerprint + "_" + timestamp + "_" + nonce);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        if (hashHex.startsWith(prefix)) {
+          return nonce;
+        }
+        nonce++;
+      }
+    }
+
+    function setStepUI(step) {
+      const step1Circles = document.querySelectorAll('.gjs-step-circle-1');
+      const step1Texts = document.querySelectorAll('.gjs-step-text-1');
+      const step2Circles = document.querySelectorAll('.gjs-step-circle-2');
+      const step2Texts = document.querySelectorAll('.gjs-step-text-2');
+
+      step1Circles.forEach(circle => {
+        if (circle) {
+          if (step === 1) {
+            circle.classList.remove('gjs-step-inactive');
+            circle.classList.add('gjs-step-active');
+          } else {
+            circle.classList.remove('gjs-step-active');
+            circle.classList.add('gjs-step-inactive');
+          }
+        }
+      });
+
+      step1Texts.forEach(text => {
+        if (text) text.style.color = (step === 1) ? '#f1f5f9' : '#cbd5e1';
+      });
+
+      step2Circles.forEach(circle => {
+        if (circle) {
+          if (step === 2) {
+            circle.classList.remove('gjs-step-inactive');
+            circle.classList.add('gjs-step-active');
+          } else {
+            circle.classList.remove('gjs-step-active');
+            circle.classList.add('gjs-step-inactive');
+          }
+        }
+      });
+
+      step2Texts.forEach(text => {
+        if (text) text.style.color = (step === 2) ? '#f1f5f9' : '#cbd5e1';
+      });
+    }
+
+    function toggleSubmitButton() {
+      const consentCheckbox = document.getElementById('pdpa-consent');
+      const submitBtn = document.getElementById('submit-btn');
+      if (!submitBtn) return;
+
+      if (isSessionReady && consentCheckbox && consentCheckbox.checked) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "สร้าง PromptPay QR";
+      } else {
+        submitBtn.disabled = true;
+        if (!isSessionReady) {
+          submitBtn.textContent = "กำลังเตรียมช่องทางปลอดภัย...";
+        } else {
+          submitBtn.textContent = "โปรดยินยอมเงื่อนไข PDPA และข้อตกลง";
+        }
+      }
+    }
+
+    async function refreshSession() {
+      isSessionReady = false;
+      activeSessionToken = "";
+      const submitBtn = document.getElementById('submit-btn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "กำลังเตรียมช่องทางปลอดภัย...";
+      }
+      
+      const clientFp = getClientFingerprint();
+      const clientTimestamp = new Date().getTime().toString();
+      
+      try {
+        const clientNonce = await solveProofOfWork(clientFp, clientTimestamp, POW_DIFFICULTY);
+        executeScriptWithRetry("initializeSession", [clientFp, clientTimestamp, clientNonce], 3, 1000)
+          .then(function(res) {
+            if (res.success && res.sessionToken) {
+              activeSessionToken = res.sessionToken;
+              isSessionReady = true;
+              toggleSubmitButton();
+            } else {
+              showError(res.message || "Failed to initialize security session. Please try again.");
+            }
+          })
+          .catch(function() {
+            showError("Network is currently busy. Please wait a moment and try again.");
+          });
+      } catch (err) {
+        showError("Client cryptography evaluation failed.");
+      }
+    }
+
+    async function submitDonation() {
+      const errorBanner = document.getElementById('error-banner');
+      if (errorBanner) errorBanner.classList.add('hidden');
+
+      const consentCheckbox = document.getElementById('pdpa-consent');
+      if (consentCheckbox && !consentCheckbox.checked) {
+        showError("You must consent to data protection policies to proceed.");
+        return;
+      }
+
+      if (!activeSessionToken) {
+        showError("Secure session token is unset. Please wait a moment.");
+        return;
+      }
+
+      const nicknameInput = document.getElementById('nickname');
+      const messageInput = document.getElementById('message');
+      const amountInput = document.getElementById('amount');
+
+      const rawNickname = nicknameInput ? nicknameInput.value : '';
+      const rawMessage = messageInput ? messageInput.value : '';
+      const rawAmount = amountInput ? parseFloat(amountInput.value) : NaN;
+
+      const cleanNickname = DOMPurify.sanitize(rawNickname).trim();
+      const cleanMessage = DOMPurify.sanitize(rawMessage).trim();
+
+      if (cleanNickname.length < 2 || cleanNickname.length > 25) {
+        showError("Display nickname must be between 2 and 25 characters.");
+        return;
+      }
+      if (cleanMessage.length > 100) {
+        showError("Support message must not exceed 100 characters.");
+        return;
+      }
+      if (isNaN(rawAmount) || rawAmount < 1.00 || rawAmount > 700000.00) {
+        showError("Amount must be between 1.00 and 700,000.00 THB.");
+        return;
+      }
+
+      setStepUI(2);
+
+      const formContainer = document.getElementById('form-container');
+      const loadingContainer = document.getElementById('loading-container');
+      
+      if (formContainer) formContainer.classList.add('hidden');
+      if (loadingContainer) loadingContainer.classList.remove('hidden');
+
+      const payload = {
+        sessionToken: activeSessionToken,
+        nickname: cleanNickname,
+        message: cleanMessage,
+        amount: rawAmount,
+        pdpaConsent: consentCheckbox ? consentCheckbox.checked : false
+      };
+
+      executeScriptWithRetry("createPayment", payload, 3, 1000)
+        .then(onPaymentSuccess)
+        .catch(onPaymentError);
+    }
+
+    function onPaymentSuccess(response) {
+      const loadingContainer = document.getElementById('loading-container');
+      const formContainer = document.getElementById('form-container');
+      const qrContainer = document.getElementById('qr-container');
+      
+      if (loadingContainer) loadingContainer.classList.add('hidden');
+      
+      if (!response.success) {
+        showError(response.message);
+        setStepUI(1);
+        refreshSession();
+        if (formContainer) formContainer.classList.remove('hidden');
+        return;
+      }
+
+      const displayAmt = document.getElementById('display-amount');
+      if (displayAmt) displayAmt.textContent = parseFloat(response.amount).toFixed(2);
+      
+      try {
+        const qrContainerElement = document.getElementById('qr-code-container');
+        if (qrContainerElement) {
+          qrContainerElement.innerHTML = ""; 
+          
+          const qrCode = new QRCodeStyling({
+            width: 240,
+            height: 240,
+            type: "svg", 
+            data: response.qr_string,
+            dotsOptions: {
+              color: "#0f172a",
+              type: "rounded"
+            },
+            backgroundOptions: {
+              color: "#ffffff"
+            },
+            cornersSquareOptions: {
+              type: "extra-rounded"
+            },
+            cornersDotOptions: {
+              type: "dot"
+            }
+          });
+          
+          qrCode.append(qrContainerElement);
+          if (qrContainer) {
+            qrContainer.classList.remove('hidden');
+            
+            // ♿ WCAG Focus Order Compliance: Shifts active focus securely to the target QR page header
+            const qrTitle = qrContainer.querySelector('.gjs-qr-title');
+            if (qrTitle) {
+              qrTitle.setAttribute('tabindex', '-1');
+              qrTitle.focus();
+            }
+          }
+        } else {
+          throw new Error("Unable to map dynamic container elements.");
+        }
+      } catch (err) {
+        showError("QR generation failed. Please try again.");
+        setStepUI(1);
+        if (formContainer) formContainer.classList.remove('hidden');
+      }
+    }
+
+    function onPaymentError(err) {
+      const loadingContainer = document.getElementById('loading-container');
+      const formContainer = document.getElementById('form-container');
+      
+      if (loadingContainer) loadingContainer.classList.add('hidden');
+      showError(err.message || "Network synchronization failure. Please try again.");
+      setStepUI(1);
+      refreshSession();
+      if (formContainer) formContainer.classList.remove('hidden');
+    }
+
+    function executeScriptWithRetry(functionName, args, retriesLeft, currentDelay) {
+      return new Promise((resolve, reject) => {
+        const runner = google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(function(err) {
+            if (retriesLeft > 0) {
+              const jitter = Math.random() * 400;
+              const maxDelay = 5000;
+              const nextDelay = Math.min(maxDelay, (currentDelay * 1.5) + jitter);
+              console.warn(`[RETRY] Downstream link unstable. Re-syncing in ${Math.round(nextDelay)}ms...`);
+              setTimeout(() => {
+                executeScriptWithRetry(functionName, args, retriesLeft - 1, nextDelay)
+                  .then(resolve)
+                  .catch(reject);
+              }, nextDelay);
+            } else {
+              reject(err);
+            }
+          });
+
+        if (args !== undefined && args !== null) {
+          if (Array.isArray(args)) {
+            runner[functionName](...args);
+          } else {
+            runner[functionName](args);
+          }
+        } else {
+          runner[functionName]();
+        }
+      });
+    }
+
+    function showError(msg) {
+      const banner = document.getElementById('error-banner');
+      if (banner) {
+        banner.textContent = DOMPurify.sanitize(msg);
+        banner.classList.remove('hidden');
+        banner.focus();
+      } else {
+        alert(DOMPurify.sanitize(msg)); 
+      }
+    }
+
+    window.resetForm = function() {
+      const form = document.getElementById('donation-form');
+      if (form) form.reset();
+      
+      const counter = document.getElementById('char-counter');
+      if (counter) counter.textContent = "0/100";
+      
+      setStepUI(1);
+      
+      const qrContainer = document.getElementById('qr-container');
+      const formContainer = document.getElementById('form-container');
+      const errorBanner = document.getElementById('error-banner');
+      
+      if (qrContainer) qrContainer.classList.add('hidden');
+      if (formContainer) {
+        formContainer.classList.remove('hidden');
+        
+        // ♿ WCAG AAA: Return Focus point back to main input interface
+        const formTitle = formContainer.querySelector('.gjs-form-title');
+        if (formTitle) {
+          formTitle.setAttribute('tabindex', '-1');
+          formTitle.focus();
+        }
+      }
+      if (errorBanner) errorBanner.classList.add('hidden');
+      
+      refreshSession();
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      const messageInput = document.getElementById('message');
+      const donationForm = document.getElementById('donation-form');
+      const pdpaConsent = document.getElementById('pdpa-consent');
+
+      if (messageInput) {
+        messageInput.addEventListener('input', function(e) {
+          const counter = document.getElementById('char-counter');
+          if (counter) {
+            counter.textContent = `${e.target.value.length}/100`;
+          }
+        });
+      }
+      
+      if (donationForm) {
+        donationForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          submitDonation();
+        });
+      }
+      
+      if (pdpaConsent) {
+        pdpaConsent.addEventListener('change', toggleSubmitButton);
+      }
+
+      // 🛡️ Decoupled Event Delegation: Prevents inline script evaluation (CSP compliant)
+      document.querySelectorAll('.gjs-form-preset-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+          const val = this.getAttribute('data-preset');
+          const amountInput = document.getElementById('amount');
+          if (amountInput) {
+            amountInput.value = val;
+            toggleSubmitButton();
+          }
+        });
+      });
+
+      const backBtn = document.getElementById('back-btn');
+      if (backBtn) {
+        backBtn.addEventListener('click', function() {
+          resetForm();
+        });
+      }
+
+      refreshSession();
+    });
+  </script>
+</body>
+</html>
