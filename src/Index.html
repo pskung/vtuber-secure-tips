@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>VTuber Donation Gateway (PDPA Compliant)</title>
   
-  <!-- 🛡️ Strict Nonce-Based Content Security Policy (No inline JavaScript allowed) -->
+  <!-- 🛡️ Strict Nonce-Based Content Security Policy (Zero inline scripts allowed) -->
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self' https://*.google.com https://*.googleusercontent.com; 
                  script-src 'self' 'nonce-secureTipsGatewayNonce' https://*.google.com https://*.googleusercontent.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
@@ -27,7 +27,6 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
 
-  <!-- Global UI structural overrides -->
   <style>
     .hidden { display: none !important; }
     .gjs-spinner {
@@ -49,7 +48,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden">
 
-  <!-- Clickjacking Protection Block -->
+  <!-- Clickjacking Security Enforcer -->
   <script nonce="secureTipsGatewayNonce">
     (function() {
       if (window.self !== window.top) {
@@ -60,45 +59,33 @@
             return parentUrl.includes(domain);
           });
           if (!isAllowed) {
-            document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>ความปลอดภัยขัดข้อง: ไม่อนุญาตให้เปิดเผยผ่าน iframe ค่ะ</div>";
+            document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>ความปลอดภัยขัดข้อง: ไม่อนุญาตให้เชื่อมต่อภายนอกผ่าน iframe ค่ะ</div>";
           }
         } catch (e) {
-          document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>ความปลอดภัยขัดข้อง: การฝังเว็บถูกปฏิเสธด้วยระบบหลังบ้านค่ะ</div>";
+          document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>ความปลอดภัยขัดข้อง: การฝังเว็บถูกระงับด้วยระบบรักษาความปลอดภัยค่ะ</div>";
         }
       }
     })();
   </script>
 
-  <!-- ==========================================
-       SECTION 1: DONATION FORM (Page 1)
-       ========================================== -->
-  <!-- 1.1 Form CSS Injected -->
-  <?!= include('src/Form_CSS'); ?>
-  
-  <!-- 1.2 Form HTML Structure -->
+  <!-- View Section 1: Inputs (Page 1 - Thai Frontend) -->
   <div id="form-container">
-    <?!= include('src/Form_HTML', { dpoEmail: dpoEmail }); ?>
+    <?!= include('src/GrapesJSForm', { dpoEmail: dpoEmail }); ?>
   </div>
 
-  <!-- Intermediate Loading Screen -->
+  <!-- Intermediate Loading Screen (Thai Frontend) -->
   <div id="loading-container" class="hidden">
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 16px; gap: 16px; min-height: 80vh;">
       <div class="gjs-spinner"></div>
       <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin: 0; font-family: sans-serif; max-width: 300px; line-height: 1.6;">
-        กำลังตรวจสอบความปลอดภัยของเครือข่ายอินเทอร์เน็ตและจองคิวการประมวลผล โปรดรอสักครู่นะคะ...
+        กำลังเตรียมช่องทางการเชื่อมต่อที่ปลอดภัยและยืนยันเซสชัน โปรดรอสักครู่นะคะ...
       </p>
     </div>
   </div>
 
-  <!-- ==========================================
-       SECTION 2: PROMPTPAY QR PRESENTATION (Page 2)
-       ========================================== -->
-  <!-- 2.1 QR CSS Injected -->
-  <?!= include('src/QR_CSS'); ?>
-  
-  <!-- 2.2 QR HTML Structure -->
+  <!-- View Section 2: QR Display (Page 2 - Thai Frontend) -->
   <div id="qr-container" class="hidden">
-    <?!= include('src/QR_HTML'); ?>
+    <?!= include('src/GrapesJSQR'); ?>
   </div>
 
   <div id="error-banner" class="hidden" role="alert" aria-live="assertive" tabindex="-1" style="max-width: 440px; margin: 16px auto; padding: 12px; border-radius: 10px; background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.18); color: #fca5a5; font-size: 12px; text-align: center; font-family: sans-serif; outline: none;"></div>
@@ -189,9 +176,9 @@
       } else {
         submitBtn.disabled = true;
         if (!isSessionReady) {
-          submitBtn.textContent = "กำลังยืนยันช่องทางความปลอดภัย...";
+          submitBtn.textContent = "กำลังยืนยันความปลอดภัยช่องทาง...";
         } else {
-          submitBtn.textContent = "โปรดยินยอมเงื่อนไข PDPA และข้อตกลง";
+          submitBtn.textContent = "โปรดยินยอมเงื่อนไขการส่งข้อมูลและข้อตกลง";
         }
       }
     }
@@ -202,7 +189,7 @@
       const submitBtn = document.getElementById('submit-btn');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "กำลังยืนยันช่องทางความปลอดภัย...";
+        submitBtn.textContent = "กำลังยืนยันความปลอดภัยช่องทาง...";
       }
       
       const clientFp = getClientFingerprint();
@@ -217,14 +204,14 @@
               isSessionReady = true;
               toggleSubmitButton();
             } else {
-              showError(res.message || "ล้มเหลวในการจองเซสชันรักษาความปลอดภัย กรุณารีเฟรชหน้าเว็บค่ะ");
+              showError(res.message || "การเชื่อมโยงรักษาความปลอดภัยล้มเหลว กรุณาโหลดหน้าเว็บใหม่อีกครั้งนะคะ");
             }
           })
           .catch(function() {
-            showError("ระบบหลังบ้านไม่ว่างชั่วคราว กรุณารอครู่หนึ่งแล้วลองใหม่อีกครั้งค่ะ");
+            showError("ระบบหลังบ้านไม่ว่างชั่วคราว กรุณารอแป๊บนึงแล้วลองใหม่อีกครั้งค่ะ");
           });
       } catch (err) {
-        showError("การแก้รหัสยืนยันฝั่งเบราว์เซอร์ไม่ถูกต้องค่ะ");
+        showError("การประมวลผลความปลอดภัยฝั่งเบราว์เซอร์ล้มเหลวค่ะ");
       }
     }
 
@@ -234,12 +221,12 @@
 
       const consentCheckbox = document.getElementById('pdpa-consent');
       if (consentCheckbox && !consentCheckbox.checked) {
-        showError("คุณต้องตกลงยินยอมข้อมูลส่วนตัวตามกฎหมาย PDPA เพื่อดำเนินการต่อค่ะ");
+        showError("คุณต้องกดยอมรับเงื่อนไขเพื่อดำเนินการต่อค่ะ");
         return;
       }
 
       if (!activeSessionToken) {
-        showError("ไม่พบค่าสิทธิ์ความปลอดภัยในระบบ กรุณารอความพร้อมของสิทธิ์สักครู่นะคะ");
+        showError("ไม่พบโทเค็นเชื่อมต่อ กรุณารอสักครู่เพื่อให้ระบบจัดสรรสิทธิ์นะคะ");
         return;
       }
 
@@ -255,15 +242,15 @@
       const cleanMessage = DOMPurify.sanitize(rawMessage).trim();
 
       if (cleanNickname.length < 2 || cleanNickname.length > 25) {
-        showError("ชื่อเล่นที่จะขึ้นแสดงหน้าจอจะต้องมีขนาด 2-25 ตัวอักษรค่ะ");
+        showError("ชื่อเล่นสำหรับขึ้นจอภาพต้องมีขนาดระหว่าง 2 ถึง 25 ตัวอักษรค่ะ");
         return;
       }
       if (cleanMessage.length > 100) {
-        showError("ข้อความอวยพรส่งท้ายจะต้องไม่ยาวเกิน 100 ตัวอักษรค่ะ");
+        showError("ข้อความอวยพร/สนับสนุนต้องไม่ยาวเกิน 100 ตัวอักษรค่ะ");
         return;
       }
       if (isNaN(rawAmount) || rawAmount < 1.00 || rawAmount > 700000.00) {
-        showError("จำนวนเงินสนับสนุนต้องระบุระหว่าง 1.00 ถึง 700,000.00 บาทค่ะ");
+        showError("จำนวนเงินสนับสนุนต้องอยู่ระหว่าง 1.00 ถึง 700,000.00 บาทค่ะ");
         return;
       }
 
@@ -335,7 +322,7 @@
           if (qrContainer) {
             qrContainer.classList.remove('hidden');
             
-            // ♿ Shift navigation focus to the step 2 header for accessibility compliance
+            // ♿ Accessible Focus Reset to Step 2 Header
             const qrTitle = qrContainer.querySelector('.gjs-qr-title');
             if (qrTitle) {
               qrTitle.setAttribute('tabindex', '-1');
@@ -343,10 +330,10 @@
             }
           }
         } else {
-          throw new Error("Unable to map dynamic container elements.");
+          throw new Error("Unable to identify target QR injection container on screen.");
         }
       } catch (err) {
-        showError("การผลิตคิวอาร์โค้ดแสดงผลผิดพลาด กรุณาทดลองใหม่อีกครั้งค่ะ");
+        showError("การผลิตภาพรหัสชำระเงินขัดข้อง กรุณาลองใหม่อีกครั้งค่ะ");
         setStepUI(1);
         if (formContainer) formContainer.classList.remove('hidden');
       }
@@ -357,7 +344,7 @@
       const formContainer = document.getElementById('form-container');
       
       if (loadingContainer) loadingContainer.classList.add('hidden');
-      showError(err.message || "เกิดความผิดพลาดในการส่งข้อมูลประสานยอดโอนเงิน กรุณาลองอีกครั้งค่ะ");
+      showError(err.message || "การซิงโครไนซ์ธุรกรรมกับระบบชำระเงินขัดข้อง โปรดลองอีกครั้งนะคะ");
       setStepUI(1);
       refreshSession();
       if (formContainer) formContainer.classList.remove('hidden');
@@ -423,7 +410,6 @@
       if (formContainer) {
         formContainer.classList.remove('hidden');
         
-        // ♿ Restore keyboard navigation focus point to step 1 title
         const formTitle = formContainer.querySelector('.gjs-form-title');
         if (formTitle) {
           formTitle.setAttribute('tabindex', '-1');
@@ -460,7 +446,7 @@
         pdpaConsent.addEventListener('change', toggleSubmitButton);
       }
 
-      // 🛡️ Mapped event delegation for CSP compatibility
+      // 🛡️ Safe Event Delegation for CSP compliance (Zero inline JS)
       document.querySelectorAll('.gjs-form-preset-btn').forEach(function(button) {
         button.addEventListener('click', function() {
           const val = this.getAttribute('data-preset');
