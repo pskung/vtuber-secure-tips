@@ -1,0 +1,287 @@
+<!-- 
+  =========================================================================
+  🍇 GrapesJS Form Page View (src/GrapesJSForm.html - Thai Language Frontend)
+  =========================================================================
+-->
+
+<style>
+  .gjs-form-wrapper {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at top, #0f172a 0%, #020617 60%, #000000 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: #cbd5e1; /* ♿ High Contrast WCAG AAA Compliant Text */
+  }
+  .gjs-form-card {
+    background-color: rgba(15, 23, 42, 0.65);
+    border: 1px solid #1e293b;
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 0 50px rgba(16, 185, 129, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    box-sizing: border-box;
+  }
+  .gjs-form-title {
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(90deg, #34d399, #2dd4bf, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+    outline: none;
+  }
+  .gjs-form-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #cbd5e1; 
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .gjs-form-step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gjs-form-step-number {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  .gjs-step-active {
+    background-color: #10b981;
+    color: #020617;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+  }
+  .gjs-step-inactive {
+    background-color: #1e293b;
+    color: #e2e8f0; 
+  }
+  .gjs-form-input-group {
+    margin-bottom: 18px;
+    text-align: left;
+  }
+  .gjs-form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #e2e8f0; 
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .gjs-form-input {
+    width: 100%;
+    padding: 11px 14px;
+    background-color: rgba(2, 6, 23, 0.8);
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    color: #f1f5f9;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+  .gjs-form-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+  }
+  .gjs-form-presets {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    width: 100%;
+  }
+  .gjs-form-preset-btn {
+    flex: 1;
+    padding: 8px;
+    background-color: rgba(2, 6, 23, 0.6);
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    color: #cbd5e1; 
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  .gjs-form-preset-btn:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+    background-color: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+  }
+  .gjs-form-details {
+    background-color: rgba(2, 6, 23, 0.5);
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
+  .gjs-form-details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #e2e8f0;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gjs-form-details-content {
+    margin-top: 8px;
+    border-top: 1px solid #1e293b;
+    padding-top: 8px;
+    max-height: 110px;
+    overflow-y: auto;
+    color: #cbd5e1; 
+    line-height: 1.6;
+    text-align: left;
+  }
+  .gjs-form-checkbox-group {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: #cbd5e1; 
+    line-height: 1.6;
+    margin-bottom: 22px;
+    text-align: left;
+  }
+  .gjs-form-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid #1e293b;
+    background-color: #020617;
+    cursor: pointer;
+    accent-color: #10b981;
+    margin-top: 2px;
+  }
+  .gjs-form-submit-btn {
+    width: 100%;
+    padding: 13px;
+    background-color: #34d399;
+    color: #020617;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.1);
+    transition: all 0.2s ease;
+  }
+  .gjs-form-submit-btn:hover:not(:disabled) {
+    background-color: #10b981;
+  }
+  .gjs-form-submit-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+</style>
+
+<div class="gjs-form-wrapper">
+  <div class="gjs-form-card">
+    
+    <div class="gjs-form-header">
+      <h2 class="gjs-form-title">VTuber Secure Tips</h2>
+    </div>
+
+    <div class="gjs-form-steps" role="navigation" aria-label="ขั้นตอนสนับสนุน">
+      <div class="gjs-form-step-item">
+        <span class="gjs-form-step-number gjs-step-circle-1 gjs-step-active">1</span>
+        <span class="gjs-step-text-1" style="color: #f1f5f9; font-weight: 600;">กรอกข้อมูล</span>
+      </div>
+      <div style="flex-grow: 1; height: 1px; background-color: #1e293b; margin: 0 12px;"></div>
+      <div class="gjs-form-step-item">
+        <span class="gjs-form-step-number gjs-step-circle-2 gjs-step-inactive">2</span>
+        <span class="gjs-step-text-2">รับรหัส QR</span>
+      </div>
+    </div>
+
+    <form id="donation-form">
+      <div class="gjs-form-input-group">
+        <label for="nickname" class="gjs-form-label">ชื่อเล่น (Nickname)</label>
+        <input type="text" id="nickname" name="nickname" required minlength="2" maxlength="25" class="gjs-form-input" placeholder="ใส่ชื่อเล่นเพื่อขึ้นแจ้งเตือน" aria-required="true">
+      </div>
+
+      <div class="gjs-form-input-group">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="message" class="gjs-form-label">ข้อความสนับสนุน (ไม่จำเป็นต้องใส่)</label>
+          <span id="char-counter" style="font-size: 10px; color: #cbd5e1;" aria-live="polite">0/100</span>
+        </div>
+        <textarea id="message" name="message" maxlength="100" rows="2" class="gjs-form-input" style="resize: none;" placeholder="เขียนส่งกำลังใจให้สตรีมเมอร์ได้นะคะ"></textarea>
+      </div>
+
+      <div class="gjs-form-input-group">
+        <label class="gjs-form-label">จำนวนเงินบริจาคแนะนำ</label>
+        <div class="gjs-form-presets">
+          <button type="button" data-preset="20" class="gjs-form-preset-btn">฿20</button>
+          <button type="button" data-preset="100" class="gjs-form-preset-btn">฿100</button>
+          <button type="button" data-preset="300" class="gjs-form-preset-btn">฿300</button>
+          <button type="button" data-preset="500" class="gjs-form-preset-btn">฿500</button>
+        </div>
+      </div>
+
+      <div class="gjs-form-input-group">
+        <label for="amount" class="gjs-form-label">ระบุจำนวนเงินด้วยตนเอง</label>
+        <div style="position: relative; display: flex; align-items: center;">
+          <span style="position: absolute; left: 14px; color: #cbd5e1; font-size: 14px;">฿</span>
+          <input type="number" id="amount" name="amount" required min="1.00" max="700000.00" step="0.01" class="gjs-form-input" style="padding-left: 28px; padding-right: 48px;" placeholder="20.00" aria-required="true">
+          <span style="position: absolute; right: 14px; color: #cbd5e1; font-size: 11px; font-weight: bold;">THB</span>
+        </div>
+      </div>
+
+      <details class="gjs-form-details">
+        <summary>
+          <span>📜 ข้อตกลงบริการและนโยบายความเป็นส่วนตัว (PDPA)</span>
+          <span style="font-size: 9px; color: #cbd5e1;">▼</span>
+        </summary>
+        <div class="gjs-form-details-content">
+          <p style="font-weight: bold; color: #cbd5e1; margin: 0 0 4px 0;">1. ข้อตกลงการใช้งานบริการ (ToS)</p>
+          <p style="margin: 0 0 8px 0;">ยอดเงินสนับสนุนนี้เป็นการโอนให้โดยเสน่หาด้วยความสมัครใจ และเมื่อทำรายการสำเร็จเรียบร้อยแล้วจะไม่สามารถเรียกร้องเพื่อคืนเงินย้อนหลังได้ทุกกรณี ข้อมูลชื่อเล่นและข้อความสนับสนุนของคุณจะถูกแสดงบนหน้าจอไลฟ์สตรีมแบบสาธารณะ</p>
+          <p style="font-weight: bold; color: #cbd5e1; margin: 0 0 4px 0;">2. นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</p>
+          <p style="margin: 0 0 8px 0;">เราจัดเก็บเฉพาะข้อมูลชื่อเล่นที่คุณกรอกเข้ามาเพื่อแสดงผลบนระบบเท่านั้น โดยไม่มีนโยบายการจัดเก็บหรือลักลอบจดบันทึกข้อมูลชื่อบัญชีจริงหรือหมายเลขบัญชีธนาคารต้นทางของคุณแต่อย่างใด และระบบจะทำการทำลายฐานข้อมูลประวัติธุรกรรมทั้งหมดโดยอัตโนมัติเมื่อครบกำหนด 30 วัน</p>
+          <p style="font-weight: bold; color: #cbd5e1; margin: 0 0 4px 0;">3. การขอลบข้อมูลและขอเพิกถอนสิทธิ์</p>
+          <p style="margin: 0;">
+            ภายใต้สิทธิ์ของกฎหมาย PDPA คุณสามารถทำเรื่องแจ้งขอลบประวัติข้อมูลการสนับสนุนของคุณออกจากฐานข้อมูลระบบของเราได้ทุกเมื่อ โดยสามารถส่งความประสงค์มายังเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล (DPO) ได้ที่อีเมล:
+            <a href="mailto:<?= Utils.encodeHtmlEntities(dpoEmail) ?>" class="text-emerald-400 underline font-semibold">
+              <?= Utils.encodeHtmlEntities(dpoEmail) ?>
+            </a> 
+            โดยประวัติธุรกรรมที่ระบุตรงกับโปรไฟล์ของคุณจะถูกทำลายทิ้งถาวรในระยะเวลาไม่เกิน 48 ชั่วโมง
+          </p>
+        </div>
+      </details>
+
+      <div class="gjs-form-checkbox-group">
+        <input type="checkbox" id="pdpa-consent" required class="gjs-form-checkbox" aria-required="true">
+        <label for="pdpa-consent" style="cursor: pointer; user-select: none;">
+          ฉันยอมรับเงื่อนไขการให้บริการ และให้ความยินยอมแก่ระบบในการประมวลผลข้อมูลชื่อเล่นของฉันเพื่อแสดงผลในสตรีมตามขอบข่ายของนโยบาย PDPA
+        </label>
+      </div>
+
+      <button type="submit" id="submit-btn" disabled class="gjs-form-submit-btn">
+        ยอมรับเงื่อนไขและกดยินยอมข้อมูล
+      </button>
+    </form>
+
+  </div>
+</div>
