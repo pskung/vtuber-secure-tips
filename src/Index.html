@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Safe VTuber Donation Gateway (Modular Multi-Page)</title>
+  <title>VTuber Donation Gateway (PDPA Compliant)</title>
   
-  <!-- 🛡️ Strict Nonce-Based Content Security Policy (Removed 'unsafe-inline' for scripts) -->
+  <!-- 🛡️ Strict Nonce-Based Content Security Policy (Zero inline scripts allowed) -->
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self' https://*.google.com https://*.googleusercontent.com; 
                  script-src 'self' 'nonce-secureTipsGatewayNonce' https://*.google.com https://*.googleusercontent.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
@@ -13,13 +13,11 @@
                  connect-src 'self' https:;
                  font-src 'self' https://fonts.gstatic.com;">
   
-  <!-- Client-side sanitization libraries with Integrity (SRI) checks -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js" 
           integrity="sha512-9+gSreomO9YcaCte0jC7Zg88rSNoeYv0g18mG1mIuY9Zsp8b/PZ80mpx8NNoDlbq7X96s738Ksw7cK7I4V6T0g==" 
           crossorigin="anonymous" 
           referrerpolicy="no-referrer"></script>
   
-  <!-- QR Code styling library secured via Subresource Integrity (SRI) -->
   <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"
           integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
           crossorigin="anonymous"></script>
@@ -50,7 +48,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden">
 
-  <!-- Clickjacking Protection -->
+  <!-- Clickjacking Security Enforcer -->
   <script nonce="secureTipsGatewayNonce">
     (function() {
       if (window.self !== window.top) {
@@ -61,31 +59,31 @@
             return parentUrl.includes(domain);
           });
           if (!isAllowed) {
-            document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>Security Alert: Direct embedding restricted.</div>";
+            document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>ความปลอดภัยขัดข้อง: ไม่อนุญาตให้เชื่อมต่อภายนอกผ่าน iframe ค่ะ</div>";
           }
         } catch (e) {
-          document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>Security Alert: Restriction enforced.</div>";
+          document.body.innerHTML = "<div style='padding: 32px; text-align: center; color: #ef4444; font-weight: bold; font-family: sans-serif;'>ความปลอดภัยขัดข้อง: การฝังเว็บถูกระงับด้วยระบบรักษาความปลอดภัยค่ะ</div>";
         }
       }
     })();
   </script>
 
-  <!-- View Section 1: Inputs (Page 1) -->
+  <!-- View Section 1: Inputs (Page 1 - Thai Frontend) -->
   <div id="form-container">
     <?!= include('src/GrapesJSForm', { dpoEmail: dpoEmail }); ?>
   </div>
 
-  <!-- Intermediate Loading Screen -->
+  <!-- Intermediate Loading Screen (Thai Frontend) -->
   <div id="loading-container" class="hidden">
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 16px; gap: 16px; min-height: 80vh;">
       <div class="gjs-spinner"></div>
       <p style="font-size: 13px; color: #cbd5e1; text-align: center; margin: 0; font-family: sans-serif; max-width: 300px; line-height: 1.6;">
-        Processing security validation and allocating session window...
+        กำลังเตรียมช่องทางการเชื่อมต่อที่ปลอดภัยและยืนยันเซสชัน โปรดรอสักครู่นะคะ...
       </p>
     </div>
   </div>
 
-  <!-- View Section 2: QR Display (Page 2) -->
+  <!-- View Section 2: QR Display (Page 2 - Thai Frontend) -->
   <div id="qr-container" class="hidden">
     <?!= include('src/GrapesJSQR'); ?>
   </div>
@@ -96,7 +94,6 @@
     let activeSessionToken = "";
     let isSessionReady = false;
     
-    // Encodes inputs to contain potential Reflected XSS risks
     const POW_DIFFICULTY = parseInt("<?= Utils.encodeHtmlEntities(powDifficulty) ?>", 10) || 3;
 
     function getClientFingerprint() {
@@ -179,9 +176,9 @@
       } else {
         submitBtn.disabled = true;
         if (!isSessionReady) {
-          submitBtn.textContent = "กำลังเตรียมช่องทางปลอดภัย...";
+          submitBtn.textContent = "กำลังยืนยันความปลอดภัยช่องทาง...";
         } else {
-          submitBtn.textContent = "โปรดยินยอมเงื่อนไข PDPA และข้อตกลง";
+          submitBtn.textContent = "โปรดยินยอมเงื่อนไขการส่งข้อมูลและข้อตกลง";
         }
       }
     }
@@ -192,7 +189,7 @@
       const submitBtn = document.getElementById('submit-btn');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "กำลังเตรียมช่องทางปลอดภัย...";
+        submitBtn.textContent = "กำลังยืนยันความปลอดภัยช่องทาง...";
       }
       
       const clientFp = getClientFingerprint();
@@ -207,14 +204,14 @@
               isSessionReady = true;
               toggleSubmitButton();
             } else {
-              showError(res.message || "Failed to initialize security session. Please try again.");
+              showError(res.message || "การเชื่อมโยงรักษาความปลอดภัยล้มเหลว กรุณาโหลดหน้าเว็บใหม่อีกครั้งนะคะ");
             }
           })
           .catch(function() {
-            showError("Network is currently busy. Please wait a moment and try again.");
+            showError("ระบบหลังบ้านไม่ว่างชั่วคราว กรุณารอแป๊บนึงแล้วลองใหม่อีกครั้งค่ะ");
           });
       } catch (err) {
-        showError("Client cryptography evaluation failed.");
+        showError("การประมวลผลความปลอดภัยฝั่งเบราว์เซอร์ล้มเหลวค่ะ");
       }
     }
 
@@ -224,12 +221,12 @@
 
       const consentCheckbox = document.getElementById('pdpa-consent');
       if (consentCheckbox && !consentCheckbox.checked) {
-        showError("You must consent to data protection policies to proceed.");
+        showError("คุณต้องกดยอมรับเงื่อนไขเพื่อดำเนินการต่อค่ะ");
         return;
       }
 
       if (!activeSessionToken) {
-        showError("Secure session token is unset. Please wait a moment.");
+        showError("ไม่พบโทเค็นเชื่อมต่อ กรุณารอสักครู่เพื่อให้ระบบจัดสรรสิทธิ์นะคะ");
         return;
       }
 
@@ -245,15 +242,15 @@
       const cleanMessage = DOMPurify.sanitize(rawMessage).trim();
 
       if (cleanNickname.length < 2 || cleanNickname.length > 25) {
-        showError("Display nickname must be between 2 and 25 characters.");
+        showError("ชื่อเล่นสำหรับขึ้นจอภาพต้องมีขนาดระหว่าง 2 ถึง 25 ตัวอักษรค่ะ");
         return;
       }
       if (cleanMessage.length > 100) {
-        showError("Support message must not exceed 100 characters.");
+        showError("ข้อความอวยพร/สนับสนุนต้องไม่ยาวเกิน 100 ตัวอักษรค่ะ");
         return;
       }
       if (isNaN(rawAmount) || rawAmount < 1.00 || rawAmount > 700000.00) {
-        showError("Amount must be between 1.00 and 700,000.00 THB.");
+        showError("จำนวนเงินสนับสนุนต้องอยู่ระหว่าง 1.00 ถึง 700,000.00 บาทค่ะ");
         return;
       }
 
@@ -325,7 +322,7 @@
           if (qrContainer) {
             qrContainer.classList.remove('hidden');
             
-            // ♿ WCAG Focus Order Compliance: Shifts active focus securely to the target QR page header
+            // ♿ Accessible Focus Reset to Step 2 Header
             const qrTitle = qrContainer.querySelector('.gjs-qr-title');
             if (qrTitle) {
               qrTitle.setAttribute('tabindex', '-1');
@@ -333,10 +330,10 @@
             }
           }
         } else {
-          throw new Error("Unable to map dynamic container elements.");
+          throw new Error("Unable to identify target QR injection container on screen.");
         }
       } catch (err) {
-        showError("QR generation failed. Please try again.");
+        showError("การผลิตภาพรหัสชำระเงินขัดข้อง กรุณาลองใหม่อีกครั้งค่ะ");
         setStepUI(1);
         if (formContainer) formContainer.classList.remove('hidden');
       }
@@ -347,7 +344,7 @@
       const formContainer = document.getElementById('form-container');
       
       if (loadingContainer) loadingContainer.classList.add('hidden');
-      showError(err.message || "Network synchronization failure. Please try again.");
+      showError(err.message || "การซิงโครไนซ์ธุรกรรมกับระบบชำระเงินขัดข้อง โปรดลองอีกครั้งนะคะ");
       setStepUI(1);
       refreshSession();
       if (formContainer) formContainer.classList.remove('hidden');
@@ -413,7 +410,6 @@
       if (formContainer) {
         formContainer.classList.remove('hidden');
         
-        // ♿ WCAG AAA: Return Focus point back to main input interface
         const formTitle = formContainer.querySelector('.gjs-form-title');
         if (formTitle) {
           formTitle.setAttribute('tabindex', '-1');
@@ -450,7 +446,7 @@
         pdpaConsent.addEventListener('change', toggleSubmitButton);
       }
 
-      // 🛡️ Decoupled Event Delegation: Prevents inline script evaluation (CSP compliant)
+      // 🛡️ Safe Event Delegation for CSP compliance (Zero inline JS)
       document.querySelectorAll('.gjs-form-preset-btn').forEach(function(button) {
         button.addEventListener('click', function() {
           const val = this.getAttribute('data-preset');
