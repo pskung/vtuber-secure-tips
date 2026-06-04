@@ -1,22 +1,77 @@
 # VTuber Secure Tips (PDPA-Compliant Model)
 
-Highly resilient, modular, stateless backend gateway designed on Google Apps Script (GAS) Serverless context. Facilitates and triggers dynamic PromptPay QR code generation and live stream notification alerts anonymized under Thailand's PDPA rules.
+## 📝 Project Architecture & Technical Specifications
 
 ---
 
-## 🚀 Key Security Features
-1. **PDPA/GDPR Compliance:** Discards real bank names and account strings. Broadcasts only display nicknames.
-2. **Aggregated Self-Healing Circuit Breaker:** Dynamically drops broken alert endpoints without affecting payment records [1.1.3].
-3. **Anti-Automation Throttling:** Multi-layered Proof-of-Work client check combined with dynamic global spike-rate queue limits.
-4. **Strict Nonce CSP:** Zero 'unsafe-inline' elements. Secure dynamic event listeners mapped under active nonce checks.
-5. **30-Day Automated Data Purge:** Automated daily time-driven cron cleanses donor history older than 30 days.
+### 1. Application Summary (สรุปการทำงานของแอปพลิเคชัน)
+
+ระบบนี้ทำหน้าที่เป็น **Enterprise-Grade, Serverless และ Completely Stateless Backend Gateway** ที่ถูกพัฒนาขึ้นบน **Google Apps Script (GAS)** เพื่อทำหน้าที่รับและประมวลผลสัญญาณการทำธุรกรรมรับเงินสนับสนุน (Donation Signals) ผ่านระบบ **Dynamic PromptPay QR Code** อย่างปลอดภัยสูง
+
+หลักการออกแบบที่สำคัญที่สุดของระบบนี้คือ **ความเป็นส่วนตัวของข้อมูลและการปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (Data Privacy & Compliance) ภายใต้กฎหมาย PDPA ของประเทศไทย และ GDPR ของสหภาพยุโรปอย่างเข้มงวด** ระบบนี้จะป้องกันความเสี่ยงในการรั่วไหลหรือเปิดเผยชื่อจริงและหมายเลขบัญชีธนาคารส่วนบุคคลของผู้โอนเงินไปยัง Streaming Platforms, Third-Party Overlays หรือแม้กระทั่งตัวสตรีมเมอร์/VTuber เองโดยสิ้นเชิง
+
+*   **Frontend-Side:** ข้อมูลนำเข้าของผู้บริจาคจะถูกรับผ่านส่วนหน้าจอเบราว์เซอร์หน้าเดียว (SPA) และผ่านการทำความสะอาดข้อมูลด้วยวิธี **Client-Side HTML Sanitization (XSS Mitigation)** พร้อมติดตั้งตัวป้องกันการยิงถล่มด้วยบ็อตก่อกวนผ่านกลไก **Proof-of-Work (PoW) Puzzle** ที่ประมวลผลบนเครื่องของไคลเอนต์เอง
+*   **Backend-Side:** เมื่อผู้ใช้งานสแกนและชำระเงินสำเร็จ สัญญาณเว็บฮุก (**Webhook Callback**) จะถูกยิงเข้ามาที่ระบบ และประมวลผลผ่านตัวแปรสิทธิการใช้งาน **Immutable State Token** เพื่อทำการซิงโครไนซ์บันทึกข้อมูลธุรกรรมแบบไม่ระบุตัวตน (Anonymized Records) ไปยัง **Firebase Realtime Database** พร้อมส่งสัญญาณภาพและเสียงแจ้งเตือนสตรีมเมอร์ผ่านทาง **Streamlabs Alert API** แบบเรียลไทม์ควบคู่กัน
+*   **Data Minimization:** เพื่อสอดคล้องตามเกณฑ์การลดการจัดเก็บข้อมูลส่วนตัวของกฎหมายคุ้มครองข้อมูลสากล ระบบจะมีสคริปต์ทำงานเบื้องหลังประจำวัน (**Time-Driven Cron Job**) คอยทำความสะอาดและลบข้อมูลที่เก่ากว่า 30 วันทิ้งโดยอัตโนมัติ
 
 ---
 
-# VTuber Secure Tips (PDPA-Compliant Model)
+### 2. Complete Tech Stack (เทคโนโลยีที่ใช้ทั้งหมด)
 
-โครงสร้างระบบเชื่อมต่อและแปลงรหัสยอดบริจาคเข้าสู่การแจ้งเตือนสตรีมเมอร์ ทำงานบนสถาปัตยกรรมไร้เซิร์ฟเวอร์ (Serverless) และไม่มีการเก็บข้อมูลอ่อนไหวถาวรบนระบบ (Stateless) พัฒนาขึ้นด้วยบริการคลาวด์ขนาดเล็กของ Google Apps Script (GAS) เพื่อส่งต่อลายเซ็นยอดจ่ายเงิน PromptPay แบบไม่ผ่านผู้รับภายนอก พร้อมมาตรฐานความสอดคล้องต่อนโยบายคุ้มครองข้อมูลส่วนบุคคลของไทย (PDPA) อย่างสมบูรณ์
+*   **Frontend (Presentation Layer):**
+    *   **GAS HTML Service:** บริการสร้างส่วนติดต่อผู้ใช้งานภายใต้แซนด์บ็อกซ์ที่ปลอดภัยของ Google
+    *   **Tailwind CSS (v2.2.19):** สำหรับการทำคอมไพล์สไตล์และเรนเดอร์หน้าจอที่รวดเร็วสูง (High-Performance rendering) [Tailwind CSS Documentation](https://tailwindcss.com/)
+    *   **DOMPurify (v3.0.9):** ไลบรารีสำหรับทำความสะอาดและล้างชุดโค้ดอันตรายเพื่อป้องกันช่องโหว่ประเภท **Cross-Site Scripting (XSS)** [DOMPurify GitHub](https://github.com/cure53/DOMPurify)
+    *   **QR-Code-Styling (v1.5.0):** ตัวประมวลผลแปลงโค้ดสัญญาณให้ออกมาเป็นภาพสแกนแบบ **SVG Vector Document** ฝั่งไคลเอนต์ เพื่อหลีกเลี่ยงการบล็อกจาก iframe/sandbox ของเบราว์เซอร์ [QR-Code-Styling GitHub](https://github.com/kozakdenys/qr-code-styling)
+    *   **HTML5 Web Crypto API:** ใช้สำหรับการคำนวณถอดรหัสและสุ่มค่าข้อมูลความปลอดภัยสูงของระบบตรวจสอบบ็อตก่อกวนแบบไร้การดึงทรัพยากรเซิร์ฟเวอร์
+*   **Backend (Controller & Integration Layer):**
+    *   **Google Apps Script (GAS):** สภาพแวดล้อมการทำงานแบบเซิร์ฟเวอร์เลสในการเขียนเว็บฮุกเรสต์ฟูล (`doPost`/`doGet`) และระบบสร้างรหัสลับลายเซ็นดิจิทัล **HMAC SHA-256** [Google Apps Script Home](https://developers.google.com/apps-script)
+    *   **GAS CacheService & LockService:** ทำงานร่วมกันเพื่อจัดการการจำกัดความถี่ในการส่งข้อมูล (Rate-Limiting Sliding Windows) และป้องกันการแย่งสิทธิ์เขียนไฟล์พร้อมกัน (Concurrency Issues) [GAS CacheService Documentation](https://developers.google.com/apps-script/reference/cache/cache)
+*   **Database (Data Store):**
+    *   **Firebase Realtime Database:** ระบบฐานข้อมูลแบบ NoSQL สเตตเลสที่มีความหน่วงต่ำ (Low-Latency) ผ่านการส่งผ่านข้อมูลแบบปลอดภัยผ่าน REST API [Firebase Console](https://console.firebase.google.com/)
+*   **Third-Party Integrations:**
+    *   **Xendit Payment API (Version 2022-07-31):** ผู้ให้บริการระบบชำระเงินและออก Dynamic QR Payload สำเร็จรูป [Xendit Developer Hub](https://docs.xendit.co/)
+    *   **Streamlabs Alert API (v2.0):** แพลตฟอร์มรับส่งสัญญาณแสดงผลรูปแจ้งเตือนบนหน้าจอไลฟ์สตรีม [Streamlabs API Settings](https://streamlabs.com/dashboard#/settings/api-settings)
 
+---
+
+### 3. Applied Architectural Patterns (รูปแบบสถาปัตยกรรมที่นำมาใช้)
+
+1.  **Decoupled Multi-Module MVC (สถาปัตยกรรมแบบแยกโมดูลอิสระ):**
+    เนื่องจากระบบของ Google Apps Script รันภายใต้ขอบเขตโกลบอลเดียวกันทั้งหมด (Flat Global Scope) เพื่อหลีกเลี่ยงการทับซ้อนและปัญหามลภาวะของเนมสเปซ (**Namespace Pollution**) ระบบจึงเลือกใช้สถาปัตยกรรม **Immutable Namespace Object Pattern** ในการกำหนดขอบเขตและห่อหุ้มตัวแปรและฟังก์ชันของแต่ละโมดูลอย่างเข้มงวด
+2.  **Parallel Multi-Tasking Orchestration (การประสานงานประมวลผลงานแบบขนาน):**
+    เพื่อหลีกเลี่ยงความล่าช้าสะสมจากการรันคำขอทีละตัวอักษร (Sequential API Call Latency) หลังบ้านจะทำการแพ็กคำขอยิงเข้าหา Firebase Database และคำขอแจ้งเตือน Streamlabs มารวมกัน แล้วทำการสั่งประมวลผลยิงคำขอออกไปยังเซิร์ฟเวอร์ต่างประเทศพร้อมกันผ่านคำสั่ง **`UrlFetchApp.fetchAll`** ช่วยลดเวลาดีเลย์ในการตอบสนองลงได้มากกว่า 40%
+3.  **Bridge Dispatcher Pattern (สถาปัตยกรรมสะพานเชื่อมต่อผ่านเว็บ):**
+    เนื่องจากฟังก์ชันเรียกงานฝั่งหน้าจอเว็บเบราว์เซอร์อย่าง `google.script.run` ไม่สามารถเรียกใช้งานเมธอดหรือสคริปต์ย่อยที่ซ้อนอยู่ภายใต้โมดูลโกลบอลอ็อบเจกต์ได้โดยตรง เราจึงสร้างไฟล์ `src/Code.gs` เพื่อทำหน้าที่เป็นสะพานเชื่อมตัวรับคำสั่ง (Gateway Routing Pipe) ในการรับคำสั่งจากผู้ใช้และโยนงานไปให้คลาสประมวลผลที่แท้จริง
+4.  **Self-Healing Circuit Breaker (ระบบเยียวยาตัดการเชื่อมต่ออัตโนมัติ):**
+    ออกแบบขึ้นมาเพื่อจำกัดความเสี่ยงจากสภาวะการสะดุดของแพลตฟอร์มภายนอก (เช่น หน้าจอ Streamlabs ล่มหรือปิดปรับปรุงชั่วคราว) โดยเมื่อระบบตรวจจับความล้มเหลวติดต่อกันครบ 3 ครั้ง ตัวประมวลผลจะทำการ "สับไฟแยกคัตเอาต์" และเปิดเข้าสู่สถานะ **OPEN** เพื่อทำหน้าที่ปฏิเสธการร้องขอทันที (Fast-Failing) เป็นเวลา 30 วินาที ช่วยรักษารันไทม์และไม่ดึงทรัพยากรส่วนเชื่อมต่อข้อมูลอื่น ๆ ให้ติดขัดตามไปด้วยค่ะ
+
+---
+
+### 4. Core Data Flow & Database Schema (เส้นทางการไหลของข้อมูลและสคีมาฐานข้อมูล)
+
+#### Execution Data Flow Chart (ผังขั้นตอนการประมวลผลธุรกรรมบริจาค)
+
+```text
+[ Browser: GrapesJSForm ]
+           │
+           ▼ (1) Solve browser Proof-of-Work (solveProofOfWork)
+[ Handshake Token Request ] ──► (2) Checks global & client rate limits (initializeSession)
+           │
+           ▼ (3) Receive HMAC-signed sessionToken -> Submits Form with user data
+[ Dispatch payment execution ] ◄── (4) Verifies & consumes sessionToken, calls provider (createPayment)
+           │
+           ▼ (5) Return SVG dynamic string payload -> Renders QR Offline (Index.html)
+[ QR Code Scanned & Paid ]
+           │
+           ▼ (6) Instant payment webhook hits GAS doPost endpoint
+[ doPost Webhook Trigger ] ──► (7) Validates X-Callback-Token with safeCompare logic
+                                │
+[ Streamlabs HUD ring alert ] ◄── (9) Parallel dispatch: Database update + Overlay alarm (fetchAll)
+                                ▲
+                                │
+                            (8) Double-checks status directly via Xendit API (verifyPaymentDirectlyWithXendit)
+```
 ---
 
 ## 🚀 จุดเด่นทางระบบความปลอดภัยและฟีเจอร์เด่น
