@@ -1,6 +1,6 @@
 <!-- 
   =========================================================================
-  🍇 GrapesJS QR Page (src/GrapesJSQR.html)
+  🍇 GrapesJS QR Code Rendering View (src/GrapesJSQR.html - Thai Language Frontend)
   =========================================================================
 -->
 
@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: center;
     padding: 24px 16px;
-    color: #cbd5e1; /* ♿ Contrast compliant */
+    color: #cbd5e1; /* ♿ High Contrast WCAG AAA Compliant Text */
   }
   .gjs-qr-card {
     background-color: rgba(15, 23, 42, 0.65);
@@ -124,12 +124,12 @@
   <div class="gjs-qr-card">
     
     <div class="gjs-qr-header">
-      <!-- ♿ Accessible dynamic alert header -->
-      <h2 class="gjs-qr-title" aria-live="polite">Scan to Tip</h2>
-      <p class="gjs-qr-subtitle">Scan this dynamically generated PromptPay code with your banking application to send support.</p>
+      <!-- ♿ Screen-Reader Accessible Dynamic Alert Header -->
+      <h2 class="gjs-qr-title" aria-live="polite">สแกนชำระเพื่อสนับสนุน</h2>
+      <p class="gjs-qr-subtitle">กรุณาเปิดแอปพลิเคชันธนาคารบนโทรศัพท์มือถือของคุณ เพื่อสแกนภาพรหัส PromptPay QR ปลอดภัยนี้ในการโอนเงินนะคะ</p>
     </div>
 
-    <div class="gjs-qr-steps" role="navigation" aria-label="Donation steps">
+    <div class="gjs-qr-steps" role="navigation" aria-label="ขั้นตอนการบริจาค">
       <div class="gjs-qr-step-item">
         <span class="gjs-qr-step-number gjs-step-circle-1 gjs-step-inactive">1</span>
         <span class="gjs-step-text-1" style="color: #cbd5e1;">กรอกข้อมูล</span>
@@ -143,20 +143,20 @@
 
     <div class="gjs-qr-box">
       <div id="qr-code-container" class="gjs-qr-canvas-wrapper">
-        <!-- SVG elements injected here dynamically via qr-code-styling -->
+        <!-- SVG Canvas Elements will be programmatically injected here by qr-code-styling -->
       </div>
       
       <div>
         <p class="gjs-qr-amount-text">
-          Tipping Amount: <span id="display-amount" class="gjs-qr-amount-display">0.00</span> THB
+          ยอดบริจาคของคุณ: <span id="display-amount" class="gjs-qr-amount-display">0.00</span> บาท
         </p>
         <p class="gjs-qr-notice">
-          This QR code contains transaction metadata. Real bank names and accounts are kept private.
+          รูปภาพรหัสด้านบนนี้เป็นระบบชำระเงินแบบปิดที่ปลอดภัย ข้อมูลชื่อจริงและเลขบัญชีธนาคารต้นทางของคุณจะไม่ถูกส่งไปยังฐานข้อมูลหรือขึ้นแสดงหน้าสตรีมเด็ดขาดค่ะ
         </p>
       </div>
 
       <button type="button" id="back-btn" class="gjs-qr-back-btn">
-        Return and Tip Again
+        กลับไปหน้าแรกเพื่อทำรายการสนับสนุนเพิ่มเติม
       </button>
     </div>
 
