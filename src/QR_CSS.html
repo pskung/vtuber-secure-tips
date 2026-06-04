@@ -1,0 +1,115 @@
+<style>
+  .gjs-qr-wrapper {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at top, #0f172a 0%, #020617 60%, #000000 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: #cbd5e1;
+  }
+  .gjs-qr-card {
+    background-color: rgba(15, 23, 42, 0.65);
+    border: 1px solid #1e293b;
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 0 50px rgba(16, 185, 129, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  .gjs-qr-title {
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(90deg, #34d399, #2dd4bf, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+    outline: none;
+  }
+  .gjs-qr-subtitle {
+    font-size: 11px;
+    color: #cbd5e1; 
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .gjs-qr-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #cbd5e1; 
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .gjs-qr-step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gjs-qr-step-number {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  .gjs-qr-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 16px 0;
+  }
+  .gjs-qr-canvas-wrapper {
+    background-color: #ffffff;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    display: inline-block;
+  }
+  .gjs-qr-amount-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #f1f5f9;
+    margin: 0;
+  }
+  .gjs-qr-amount-display {
+    color: #34d399;
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.25);
+  }
+  .gjs-qr-notice {
+    font-size: 11px;
+    color: #cbd5e1; 
+    max-width: 300px;
+    margin: 8px auto 0 auto;
+    line-height: 1.6;
+  }
+  .gjs-qr-back-btn {
+    background: none;
+    border: none;
+    color: #cbd5e1; 
+    text-decoration: underline;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    margin-top: 12px;
+  }
+  .gjs-qr-back-btn:hover {
+    color: #34d399;
+  }
+</style>
