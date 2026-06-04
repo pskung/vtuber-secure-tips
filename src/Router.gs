@@ -32,7 +32,7 @@ function doGet(e) {
       return output;
     } catch (innerErr) {
       Utils.safeLog("GET Request Rendering Failed", "CRITICAL", innerErr);
-      return HtmlService.createHtmlOutput("<h2>A temporary error occurred. Please try again later.</h2>");
+      return HtmlService.createHtmlOutput("<h2>A temporary server-side execution error occurred. Please try again later.</h2>");
     }
   }
 }
