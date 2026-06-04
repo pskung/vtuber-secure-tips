@@ -14,11 +14,12 @@ const PaymentGateway = {
       const amount = parseFloat(formData.amount);
       const pdpaConsent = Boolean(formData.pdpaConsent);
 
-      if (!pdpaConsent) return Utils.createValidationError("Consent Required: You must agree to the data protection policies.");
-      if (!SecurityService.verifyAndConsumeToken(sessionToken, provider)) return Utils.createValidationError("Session token validation failed or expired. Please reload the page.");
-      if (!Utils.validateNickname(nickname)) return Utils.createValidationError("Nickname must be alphanumeric, containing only Thai/English, spaces, dots, or hyphens (2-25 characters).");
-      if (message.length > 100) return Utils.createValidationError("Message cannot exceed 100 characters.");
-      if (isNaN(amount) || amount < 1.00 || amount > 700000.00) return Utils.createValidationError("Amount must be between 1.00 and 700,000.00 THB.");
+      // Frontend error returns: Kept in Thai language since the donor faces this UI
+      if (!pdpaConsent) return Utils.createValidationError("จำเป็นต้องกดยินยอม: โปรดยอมรับนโยบายคุ้มครองข้อมูลส่วนบุคคลเพื่อดำเนินการต่อค่ะ");
+      if (!SecurityService.verifyAndConsumeToken(sessionToken, provider)) return Utils.createValidationError("ระบบยืนยันสิทธิ์เซสชันไม่ผ่าน หรือเซสชันหมดอายุแล้ว กรุณารีเฟรชหน้าต่างใหม่อีกครั้งนะคะ");
+      if (!Utils.validateNickname(nickname)) return Utils.createValidationError("ชื่อเล่นที่แสดงต้องมีความยาว 2-25 ตัวอักษร และพิมพ์ได้เฉพาะอักษรไทย อังกฤษ ตัวเลข จุด ขีด หรือเว้นวรรคเท่านั้นค่ะ");
+      if (message.length > 100) return Utils.createValidationError("ข้อความส่งให้กำลังใจต้องมีความยาวไม่เกิน 100 ตัวอักษรค่ะ");
+      if (isNaN(amount) || amount < 1.00 || amount > 700000.00) return Utils.createValidationError("ยอดสนับสนุนที่กำหนดได้ ต้องอยู่ระหว่าง 1.00 ถึง 700,000.00 บาทค่ะ");
 
       const config = Config.get(provider);
       const xenditSecret = config.XENDIT_SECRET_KEY;
@@ -66,7 +67,7 @@ const PaymentGateway = {
       return {
         success: false,
         isValidationError: false,
-        message: err.message.indexOf("Circuit Breaker") !== -1 ? err.message : "A temporary transaction generation failure occurred. Please try again later."
+        message: err.message.indexOf("Circuit Breaker") !== -1 ? err.message : "เกิดความขัดข้องชั่วคราวในการสร้างรหัสการชำระเงิน กรุณาทดลองทำรายการใหม่อีกครั้งในครู่ถัดไปค่ะ"
       };
     }
   },
