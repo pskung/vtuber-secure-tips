@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <title>VTuber Donation Gateway (PDPA Compliant)</title>
   
-  <!-- 🛡️ Strict Nonce-Based Content Security Policy (Zero inline scripts allowed) -->
+  <!-- 🛡️ Hardened CSP: Added frame-ancestors to prevent Clickjacking -->
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self' https://*.google.com https://*.googleusercontent.com; 
                  script-src 'self' 'nonce-secureTipsGatewayNonce' https://*.google.com https://*.googleusercontent.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
                  style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; 
                  img-src 'self' data: https:; 
                  connect-src 'self' https:;
-                 font-src 'self' https://fonts.gstatic.com;">
+                 font-src 'self' https://fonts.gstatic.com;
+                 frame-ancestors 'self' https://sites.google.com https://*.googleusercontent.com;">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js" 
           integrity="sha512-9+gSreomO9YcaCte0jC7Zg88rSNoeYv0g18mG1mIuY9Zsp8b/PZ80mpx8NNoDlbq7X96s738Ksw7cK7I4V6T0g==" 
@@ -94,7 +95,7 @@
     let activeSessionToken = "";
     let isSessionReady = false;
     
-    const POW_DIFFICULTY = parseInt("<?= Utils.encodeHtmlEntities(powDifficulty) ?>", 10) || 3;
+    const POW_DIFFICULTY = parseInt("<?= powDifficulty ?>", 10);
 
     function getClientFingerprint() {
       let fp = localStorage.getItem("client_fp");
