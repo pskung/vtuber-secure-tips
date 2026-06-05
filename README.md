@@ -1,77 +1,37 @@
 # VTuber Secure Tips (PDPA-Compliant Model)
 
-## 📝 Project Architecture & Technical Specifications
+## 1. ภาพรวมโครงการและสถาปัตยกรรม (Project Overview & Architecture)
+
+### สรุปการทำงานของระบบ
+**VTuber Secure Tips** คือระบบ Gateway สำหรับรับเงินสนับสนุน (Donation) สำหรับ Vtuber โดยเน้นความปลอดภัยระดับสูงและการปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA) ระบบทำหน้าที่เป็นตัวกลางในการสร้าง PromptPay QR Code ผ่าน Xendit, บันทึกประวัติการโอนเงินลง Firebase Realtime Database และส่งการแจ้งเตือนไปยัง Streamlabs เพื่อให้ปรากฏบนหน้าจอไลฟ์สตรีมแบบ Real-time
+
+### เทคโนโลยีที่ใช้ (Tech Stack)
+- **Backend Runtime:** Google Apps Script (GAS) - V8 Engine
+- **Frontend:** HTML5, CSS3 (Modern CSS with Glassmorphism), JavaScript (ES6+)
+- **Database:** Firebase Realtime Database (NoSQL)
+- **Payment Gateway:** Xendit API (PromptPay Dynamic QR)
+- **Alert System:** Streamlabs API
+- **Security:**
+    - **Proof-of-Work (PoW):** ป้องกัน Bot/Spam ในระดับ Client-side
+    - **HMAC Session Signing:** ตรวจสอบความถูกต้องของเซสชันด้วย Cryptographic Signature
+    - **Circuit Breaker Pattern:** ป้องกันระบบล่มเมื่อ API ภายนอก (Xendit/Streamlabs) มีปัญหา
+    - **CSP (Content Security Policy):** ป้องกัน XSS และ Clickjacking
+
+### รูปแบบสถาปัตยกรรม (Architectural Patterns)
+ระบบใช้รูปแบบ **Layered Architecture** เพื่อแยกความรับผิดชอบ (Separation of Concerns):
+1.  **Routing Layer (`Router.gs`):** จัดการ Request (doGet/doPost) และการ Render หน้าจอ
+2.  **Service Layer (`Security.gs`, `DatabaseService.gs`, `PaymentGateway.gs`, `AlertService.gs`):** จัดการ Logic ทางธุรกิจและการประมวลผลหลัก
+3.  **Infrastructure Layer (`Config.gs`, `Utils.gs`, `CircuitBreaker.gs`):** จัดการการตั้งค่า, ตัวช่วยทั่วไป และการควบคุมความเสถียรของระบบ
 
 ---
 
-### 1. Application Summary (สรุปการทำงานของแอปพลิเคชัน)
+## 2. การไหลของข้อมูลและโครงสร้างฐานข้อมูล (Data Flow & Schema)
 
-ระบบนี้ทำหน้าที่เป็น **Enterprise-Grade, Serverless และ Completely Stateless Backend Gateway** ที่ถูกพัฒนาขึ้นบน **Google Apps Script (GAS)** เพื่อทำหน้าที่รับและประมวลผลสัญญาณการทำธุรกรรมรับเงินสนับสนุน (Donation Signals) ผ่านระบบ **Dynamic PromptPay QR Code** อย่างปลอดภัยสูง
+### การไหลของข้อมูล (Data Flow)
+1.  **Session Handshake:** User $\rightarrow$ `Index.html` (Solve PoW) $\rightarrow$ `Security.initializeSession` $\rightarrow$ Receive Signed Session Token.
+2.  **Payment Request:** User $\rightarrow$ `GrapesJSForm.html` $\rightarrow$ `PaymentGateway.createPayment` (Verify Token) $\rightarrow$ Xendit API $\rightarrow$ Return QR String.
+3.  **Payment Confirmation:** Xendit Webhook $\rightarrow$ `Router.doPost` $\rightarrow$ `PaymentGateway.verifyPaymentDirectlyWithXendit` (Double Check) $\rightarrow$ Write to Firebase $\rightarrow$ Send to Streamlabs.
 
-หลักการออกแบบที่สำคัญที่สุดของระบบนี้คือ **ความเป็นส่วนตัวของข้อมูลและการปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคล (Data Privacy & Compliance) ภายใต้กฎหมาย PDPA ของประเทศไทย และ GDPR ของสหภาพยุโรปอย่างเข้มงวด** ระบบนี้จะป้องกันความเสี่ยงในการรั่วไหลหรือเปิดเผยชื่อจริงและหมายเลขบัญชีธนาคารส่วนบุคคลของผู้โอนเงินไปยัง Streaming Platforms, Third-Party Overlays หรือแม้กระทั่งตัวสตรีมเมอร์/VTuber เองโดยสิ้นเชิง
-
-*   **Frontend-Side:** ข้อมูลนำเข้าของผู้บริจาคจะถูกรับผ่านส่วนหน้าจอเบราว์เซอร์หน้าเดียว (SPA) และผ่านการทำความสะอาดข้อมูลด้วยวิธี **Client-Side HTML Sanitization (XSS Mitigation)** พร้อมติดตั้งตัวป้องกันการยิงถล่มด้วยบ็อตก่อกวนผ่านกลไก **Proof-of-Work (PoW) Puzzle** ที่ประมวลผลบนเครื่องของไคลเอนต์เอง
-*   **Backend-Side:** เมื่อผู้ใช้งานสแกนและชำระเงินสำเร็จ สัญญาณเว็บฮุก (**Webhook Callback**) จะถูกยิงเข้ามาที่ระบบ และประมวลผลผ่านตัวแปรสิทธิการใช้งาน **Immutable State Token** เพื่อทำการซิงโครไนซ์บันทึกข้อมูลธุรกรรมแบบไม่ระบุตัวตน (Anonymized Records) ไปยัง **Firebase Realtime Database** พร้อมส่งสัญญาณภาพและเสียงแจ้งเตือนสตรีมเมอร์ผ่านทาง **Streamlabs Alert API** แบบเรียลไทม์ควบคู่กัน
-*   **Data Minimization:** เพื่อสอดคล้องตามเกณฑ์การลดการจัดเก็บข้อมูลส่วนตัวของกฎหมายคุ้มครองข้อมูลสากล ระบบจะมีสคริปต์ทำงานเบื้องหลังประจำวัน (**Time-Driven Cron Job**) คอยทำความสะอาดและลบข้อมูลที่เก่ากว่า 30 วันทิ้งโดยอัตโนมัติ
-
----
-
-### 2. Complete Tech Stack (เทคโนโลยีที่ใช้ทั้งหมด)
-
-*   **Frontend (Presentation Layer):**
-    *   **GAS HTML Service:** บริการสร้างส่วนติดต่อผู้ใช้งานภายใต้แซนด์บ็อกซ์ที่ปลอดภัยของ Google
-    *   **Tailwind CSS (v2.2.19):** สำหรับการทำคอมไพล์สไตล์และเรนเดอร์หน้าจอที่รวดเร็วสูง (High-Performance rendering) [Tailwind CSS Documentation](https://tailwindcss.com/)
-    *   **DOMPurify (v3.0.9):** ไลบรารีสำหรับทำความสะอาดและล้างชุดโค้ดอันตรายเพื่อป้องกันช่องโหว่ประเภท **Cross-Site Scripting (XSS)** [DOMPurify GitHub](https://github.com/cure53/DOMPurify)
-    *   **QR-Code-Styling (v1.5.0):** ตัวประมวลผลแปลงโค้ดสัญญาณให้ออกมาเป็นภาพสแกนแบบ **SVG Vector Document** ฝั่งไคลเอนต์ เพื่อหลีกเลี่ยงการบล็อกจาก iframe/sandbox ของเบราว์เซอร์ [QR-Code-Styling GitHub](https://github.com/kozakdenys/qr-code-styling)
-    *   **HTML5 Web Crypto API:** ใช้สำหรับการคำนวณถอดรหัสและสุ่มค่าข้อมูลความปลอดภัยสูงของระบบตรวจสอบบ็อตก่อกวนแบบไร้การดึงทรัพยากรเซิร์ฟเวอร์
-*   **Backend (Controller & Integration Layer):**
-    *   **Google Apps Script (GAS):** สภาพแวดล้อมการทำงานแบบเซิร์ฟเวอร์เลสในการเขียนเว็บฮุกเรสต์ฟูล (`doPost`/`doGet`) และระบบสร้างรหัสลับลายเซ็นดิจิทัล **HMAC SHA-256** [Google Apps Script Home](https://developers.google.com/apps-script)
-    *   **GAS CacheService & LockService:** ทำงานร่วมกันเพื่อจัดการการจำกัดความถี่ในการส่งข้อมูล (Rate-Limiting Sliding Windows) และป้องกันการแย่งสิทธิ์เขียนไฟล์พร้อมกัน (Concurrency Issues) [GAS CacheService Documentation](https://developers.google.com/apps-script/reference/cache/cache)
-*   **Database (Data Store):**
-    *   **Firebase Realtime Database:** ระบบฐานข้อมูลแบบ NoSQL สเตตเลสที่มีความหน่วงต่ำ (Low-Latency) ผ่านการส่งผ่านข้อมูลแบบปลอดภัยผ่าน REST API [Firebase Console](https://console.firebase.google.com/)
-*   **Third-Party Integrations:**
-    *   **Xendit Payment API (Version 2022-07-31):** ผู้ให้บริการระบบชำระเงินและออก Dynamic QR Payload สำเร็จรูป [Xendit Developer Hub](https://docs.xendit.co/)
-    *   **Streamlabs Alert API (v2.0):** แพลตฟอร์มรับส่งสัญญาณแสดงผลรูปแจ้งเตือนบนหน้าจอไลฟ์สตรีม [Streamlabs API Settings](https://streamlabs.com/dashboard#/settings/api-settings)
-
----
-
-### 3. Applied Architectural Patterns (รูปแบบสถาปัตยกรรมที่นำมาใช้)
-
-1.  **Decoupled Multi-Module MVC (สถาปัตยกรรมแบบแยกโมดูลอิสระ):**
-    เนื่องจากระบบของ Google Apps Script รันภายใต้ขอบเขตโกลบอลเดียวกันทั้งหมด (Flat Global Scope) เพื่อหลีกเลี่ยงการทับซ้อนและปัญหามลภาวะของเนมสเปซ (**Namespace Pollution**) ระบบจึงเลือกใช้สถาปัตยกรรม **Immutable Namespace Object Pattern** ในการกำหนดขอบเขตและห่อหุ้มตัวแปรและฟังก์ชันของแต่ละโมดูลอย่างเข้มงวด
-2.  **Parallel Multi-Tasking Orchestration (การประสานงานประมวลผลงานแบบขนาน):**
-    เพื่อหลีกเลี่ยงความล่าช้าสะสมจากการรันคำขอทีละตัวอักษร (Sequential API Call Latency) หลังบ้านจะทำการแพ็กคำขอยิงเข้าหา Firebase Database และคำขอแจ้งเตือน Streamlabs มารวมกัน แล้วทำการสั่งประมวลผลยิงคำขอออกไปยังเซิร์ฟเวอร์ต่างประเทศพร้อมกันผ่านคำสั่ง **`UrlFetchApp.fetchAll`** ช่วยลดเวลาดีเลย์ในการตอบสนองลงได้มากกว่า 40%
-3.  **Bridge Dispatcher Pattern (สถาปัตยกรรมสะพานเชื่อมต่อผ่านเว็บ):**
-    เนื่องจากฟังก์ชันเรียกงานฝั่งหน้าจอเว็บเบราว์เซอร์อย่าง `google.script.run` ไม่สามารถเรียกใช้งานเมธอดหรือสคริปต์ย่อยที่ซ้อนอยู่ภายใต้โมดูลโกลบอลอ็อบเจกต์ได้โดยตรง เราจึงสร้างไฟล์ `src/Code.gs` เพื่อทำหน้าที่เป็นสะพานเชื่อมตัวรับคำสั่ง (Gateway Routing Pipe) ในการรับคำสั่งจากผู้ใช้และโยนงานไปให้คลาสประมวลผลที่แท้จริง
-4.  **Self-Healing Circuit Breaker (ระบบเยียวยาตัดการเชื่อมต่ออัตโนมัติ):**
-    ออกแบบขึ้นมาเพื่อจำกัดความเสี่ยงจากสภาวะการสะดุดของแพลตฟอร์มภายนอก (เช่น หน้าจอ Streamlabs ล่มหรือปิดปรับปรุงชั่วคราว) โดยเมื่อระบบตรวจจับความล้มเหลวติดต่อกันครบ 3 ครั้ง ตัวประมวลผลจะทำการ "สับไฟแยกคัตเอาต์" และเปิดเข้าสู่สถานะ **OPEN** เพื่อทำหน้าที่ปฏิเสธการร้องขอทันที (Fast-Failing) เป็นเวลา 30 วินาที ช่วยรักษารันไทม์และไม่ดึงทรัพยากรส่วนเชื่อมต่อข้อมูลอื่น ๆ ให้ติดขัดตามไปด้วยค่ะ
-
----
-
-### 4. Core Data Flow & Database Schema (เส้นทางการไหลของข้อมูลและสคีมาฐานข้อมูล)
-
-#### Execution Data Flow Chart (ผังขั้นตอนการประมวลผลธุรกรรมบริจาค)
-
-```text
-[ Browser: GrapesJSForm ]
-           │
-           ▼ (1) Solve browser Proof-of-Work (solveProofOfWork)
-[ Handshake Token Request ] ──► (2) Checks global & client rate limits (initializeSession)
-           │
-           ▼ (3) Receive HMAC-signed sessionToken -> Submits Form with user data
-[ Dispatch payment execution ] ◄── (4) Verifies & consumes sessionToken, calls provider (createPayment)
-           │
-           ▼ (5) Return SVG dynamic string payload -> Renders QR Offline (Index.html)
-[ QR Code Scanned & Paid ]
-           │
-           ▼ (6) Instant payment webhook hits GAS doPost endpoint
-[ doPost Webhook Trigger ] ──► (7) Validates X-Callback-Token with safeCompare logic
-                                │
-[ Streamlabs HUD ring alert ] ◄── (9) Parallel dispatch: Database update + Overlay alarm (fetchAll)
-                                ▲
-                                │
-                            (8) Double-checks status directly via Xendit API (verifyPaymentDirectlyWithXendit)
-```
 ---
 
 ## 🚀 จุดเด่นทางระบบความปลอดภัยและฟีเจอร์เด่น
