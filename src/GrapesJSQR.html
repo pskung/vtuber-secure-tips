@@ -1,164 +1,760 @@
-<!-- 
-  =========================================================================
-  🍇 GrapesJS QR Code Rendering View (src/GrapesJSQR.html - Thai Language Frontend)
-  =========================================================================
--->
+<!DOCTYPE html>
+<html>
 
-<style>
-  .gjs-qr-wrapper {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: radial-gradient(circle at top, #0f172a 0%, #020617 60%, #000000 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    color: #cbd5e1; /* ♿ High Contrast WCAG AAA Compliant Text */
-  }
-  .gjs-qr-card {
-    background-color: rgba(15, 23, 42, 0.65);
-    border: 1px solid #1e293b;
-    border-radius: 20px;
-    padding: 28px;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 0 50px rgba(16, 185, 129, 0.04);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    position: relative;
-    box-sizing: border-box;
-    text-align: center;
-  }
-  .gjs-qr-title {
-    font-size: 24px;
-    font-weight: 800;
-    text-align: center;
-    background: linear-gradient(90deg, #34d399, #2dd4bf, #34d399);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 6px;
-    letter-spacing: -0.5px;
-    outline: none;
-  }
-  .gjs-qr-subtitle {
-    font-size: 11px;
-    color: #cbd5e1; 
-    text-align: center;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-  .gjs-qr-steps {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    color: #cbd5e1; 
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #1e293b;
-  }
-  .gjs-qr-step-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .gjs-qr-step-number {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    transition: all 0.3s ease;
-  }
-  .gjs-qr-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    margin: 16px 0;
-  }
-  .gjs-qr-canvas-wrapper {
-    background-color: #ffffff;
-    padding: 16px;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-    display: inline-block;
-  }
-  .gjs-qr-amount-text {
-    font-size: 18px;
-    font-weight: bold;
-    color: #f1f5f9;
-    margin: 0;
-  }
-  .gjs-qr-amount-display {
-    color: #34d399;
-    text-shadow: 0 0 8px rgba(52, 211, 153, 0.25);
-  }
-  .gjs-qr-notice {
-    font-size: 11px;
-    color: #cbd5e1; 
-    max-width: 300px;
-    margin: 8px auto 0 auto;
-    line-height: 1.6;
-  }
-  .gjs-qr-back-btn {
-    background: none;
-    border: none;
-    color: #cbd5e1; 
-    text-decoration: underline;
-    font-size: 13px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-    margin-top: 12px;
-  }
-  .gjs-qr-back-btn:hover {
-    color: #34d399;
-  }
-</style>
+<head>
+  <title>Page 2</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <meta name="generator" content="GrapesJS Studio" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<div class="gjs-qr-wrapper">
-  <div class="gjs-qr-card">
-    
-    <div class="gjs-qr-header">
-      <!-- ♿ Screen-Reader Accessible Dynamic Alert Header -->
-      <h2 class="gjs-qr-title" aria-live="polite">สแกนชำระเพื่อสนับสนุน</h2>
-      <p class="gjs-qr-subtitle">กรุณาเปิดแอปพลิเคชันธนาคารบนโทรศัพท์มือถือของคุณ เพื่อสแกนภาพรหัส PromptPay QR ปลอดภัยนี้ในการโอนเงินนะคะ</p>
-    </div>
+    body {
+      margin: 0;
+    }
 
-    <div class="gjs-qr-steps" role="navigation" aria-label="ขั้นตอนการบริจาค">
-      <div class="gjs-qr-step-item">
-        <span class="gjs-qr-step-number gjs-step-circle-1 gjs-step-inactive">1</span>
-        <span class="gjs-step-text-1" style="color: #cbd5e1;">กรอกข้อมูล</span>
+    :root {
+      --gjs-t-color-primary: #cf549e;
+      --gjs-t-color-secondary: #b9227d;
+      --gjs-t-color-accent: #ffb347;
+      --gjs-t-color-success: #28a745;
+      --gjs-t-color-warning: #ffc107;
+      --gjs-t-color-error: #dc3545;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.4);
+      --accent: #2dd4bf;
+      --bg-dark: #020617;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --text-main: #4b5563;
+      --text-muted: #94a3b8;
+      --primary-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+      --accent-gradient: linear-gradient(to right, #34d399, #3b82f6);
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --text-dark: #1f2937;
+    }
+
+    body {
+      background-color: #e7e7e7;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+    }
+
+    .head {
+      padding: 50px 50px 35px;
+    }
+
+    .logo {
+      height: 50px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .card {
+      max-width: 700px;
+      padding: 40px 45px;
+      background-color: white;
+      border-radius: 15px;
+      margin: 0 auto;
+    }
+
+    .title {
+      margin: 0;
+      text-align: center;
+    }
+
+    .gjs-t-body {
+      background-color: inherit;
+      color: inherit;
+      font-size: 1rem;
+      line-height: 1.75rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin: 0;
+      padding: 25px 0;
+    }
+
+    .paragraph {
+      line-height: 1.5;
+      margin-bottom: 40px;
+    }
+
+    .link {
+      color: #af4e8a;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .gjs-t-h1 {
+      color: var(--gjs-t-color-secondary);
+      font-size: 1.5rem;
+      line-height: 2.5rem;
+    }
+
+    .button {
+      display: block;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      text-align: center;
+      border-width: 0;
+    }
+
+    .gjs-t-h2 {
+      color: #601843;
+      font-size: 1.2rem;
+      line-height: 1.75rem;
+    }
+
+    .gjs-t-button {
+      background-color: var(--gjs-t-color-primary);
+      color: white;
+      border-radius: 0.3rem;
+    }
+
+    .gjs-t-link {
+      color: var(--gjs-t-color-primary);
+      text-decoration: underline;
+    }
+
+    .gjs-t-border {
+      border-radius: 0.3rem;
+      border-color: #e0e0e0;
+    }
+
+    .gjs-form-wrapper {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #fdfcfb 0%, #e2d1f9 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: #5b5b5b;
+    }
+
+    .gjs-form-card {
+      background-color: rgba(15, 23, 42, 0.65);
+      border: 2px solid #ffffff;
+      border-radius: 30px;
+      padding: 32px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 20px 40px rgba(168, 150, 200, 0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: relative;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.7);
+      animation: slideUp 0.6s ease-out;
+    }
+
+    .gjs-form-title {
+      font-size: 32px;
+      font-weight: 800;
+      text-align: center;
+      background: linear-gradient(90deg, #ff7eb3, #ff758c, #acb6e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+      outline: none;
+    }
+
+    .gjs-form-steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-bottom: 30px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+      gap: 12px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 100px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .gjs-form-step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 100px;
+      transition: all 0.3s ease;
+      color: #cbd5e1;
+    }
+
+    .gjs-form-step-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .gjs-step-active {
+      background-color: #10b981;
+      color: white;
+      box-shadow: 0 4px 10px rgba(255, 126, 179, 0.4);
+      background: linear-gradient(45deg, #ff7eb3, #acb6e5);
+    }
+
+    .gjs-step-inactive {
+      background-color: #e0e0e0;
+      color: #a0a0a0;
+      background: #e2e8f0;
+    }
+
+    .gjs-form-input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .gjs-form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #7a7a7a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      margin-left: 4px;
+    }
+
+    .gjs-form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 2px solid #eee;
+      border-radius: 18px;
+      color: #444;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .gjs-form-input:focus {
+      outline: none;
+      border-color: #ff7eb3;
+      box-shadow: 0 0 0 4px rgba(255, 126, 179, 0.1);
+      background: white;
+      background-color: #fff;
+    }
+
+    .gjs-form-presets {
+      display: grid;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      width: 100%;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .gjs-form-preset-btn {
+      flex: 1;
+      padding: 12px 5px;
+      background-color: rgba(2, 6, 23, 0.6);
+      border: 2px solid #f0f0f0;
+      border-radius: 14px;
+      color: #7a7a7a;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      background: #fff;
+    }
+
+    .gjs-form-preset-btn:hover {
+      border-color: #ff7eb3;
+      background-color: rgba(16, 185, 129, 0.08);
+      color: #ff7eb3;
+      background: #fff1f2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 126, 179, 0.1);
+    }
+
+    .gjs-form-details {
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid #eef;
+      border-radius: 15px;
+      padding: 12px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .gjs-form-details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #7a7a7a;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style: none;
+    }
+
+    .gjs-form-details-content {
+      margin-top: 10px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      color: #888;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .gjs-form-checkbox-group {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: #7a7a7a;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.4);
+      padding: 12px;
+      border-radius: 15px;
+    }
+
+    .gjs-form-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid #1e293b;
+      background-color: #020617;
+      cursor: pointer;
+      accent-color: #ff7eb3;
+      margin-top: 2px;
+    }
+
+    .gjs-form-submit-btn {
+      width: 100%;
+      padding: 16px;
+      background-color: #34d399;
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(255, 126, 179, 0.3);
+      transition: all 0.3s ease;
+      background: linear-gradient(45deg, #ff7eb3, #ff758c);
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .gjs-form-submit-btn:hover:not(:disabled) {
+      background-color: #10b981;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 25px rgba(255, 126, 179, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .gjs-form-submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(1);
+      background: #ccc;
+      box-shadow: none;
+    }
+
+    .gjs-qr-wrapper {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #fdfcfb 0%, #e2d1f9 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: #5b5b5b;
+      undefined: undefined;
+    }
+
+    .gjs-qr-card {
+      background-color: rgba(15, 23, 42, 0.65);
+      border: 2px solid #ffffff;
+      border-radius: 30px;
+      padding: 32px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px rgba(168, 150, 200, 0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: relative;
+      box-sizing: border-box;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.7);
+      animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .gjs-qr-title {
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      background: linear-gradient(90deg, #ff7eb3, #ff758c, #acb6e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      outline: none;
+    }
+
+    .gjs-qr-subtitle {
+      font-size: 14px;
+      color: #8e8e8e;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .gjs-qr-steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-bottom: 30px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+      gap: 12px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 100px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: 600;
+    }
+
+    .gjs-qr-step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 100px;
+    }
+
+    .gjs-qr-step-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .gjs-qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin: 20px 0;
+    }
+
+    .gjs-qr-canvas-wrapper {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      display: inline-block;
+      background: #ffffff;
+      transition: transform 0.3s ease;
+      border: 4px solid #fff;
+      outline: 2px solid #f0f0f0;
+      position: relative;
+    }
+
+    .gjs-qr-amount-text {
+      font-size: 20px;
+      font-weight: 400;
+      color: #7a7a7a;
+      margin: 0;
+      margin-bottom: 4px;
+    }
+
+    .gjs-qr-amount-display {
+      color: #ff7eb3;
+      text-shadow: 0 0 15px rgba(255, 126, 179, 0.2);
+      display: block;
+      font-size: 32px;
+      font-weight: 800;
+      margin-top: 4px;
+      margin-bottom: 10px;
+    }
+
+    .gjs-qr-notice {
+      font-size: 12px;
+      color: #bbb;
+      max-width: 320px;
+      margin: 0 auto;
+      line-height: 1.6;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .gjs-qr-back-btn {
+      background: none;
+      border: none;
+      color: #ff7eb3;
+      text-decoration: underline;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 20px;
+      font-weight: 600;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .gjs-qr-back-btn:hover {
+      color: #ff758c;
+      opacity: 1;
+      text-decoration: underline;
+      transform: scale(1.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .gjs-qr-canvas-wrapper:hover {
+      transform: scale(1.02);
+    }
+
+    .gjs-form-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #8e8e8e;
+      margin-bottom: 24px;
+    }
+
+    #i8pgqo {
+      color: #ff7eb3;
+    }
+
+    #char-counter {
+      font-size: 11px;
+      color: #bbb;
+    }
+
+    #injfic {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #message {
+      resize: none;
+    }
+
+    #iolx89 {
+      position: absolute;
+      left: 18px;
+      color: #ff7eb3;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    #amount {
+      padding-left: 35px;
+      padding-right: 55px;
+    }
+
+    #in2aic {
+      position: absolute;
+      right: 18px;
+      color: #bbb;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #iyeaip {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    #igs0vq {
+      font-weight: 600;
+      color: #7a7a7a;
+      margin: 0 0 4px 0;
+    }
+
+    #i1bvbt {
+      margin: 0 0 8px 0;
+    }
+
+    #ihvppg {
+      font-weight: 600;
+      color: #7a7a7a;
+      margin: 0 0 4px 0;
+    }
+
+    #iazaus {
+      margin: 0 0 8px 0;
+    }
+
+    #iyu4ed {
+      font-weight: 600;
+      color: #7a7a7a;
+      margin: 0 0 4px 0;
+    }
+
+    #iv3mxi {
+      color: #ff7eb3;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    #i09xy4 {
+      margin: 0;
+    }
+
+    #i4lvkp {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #icco0m {
+      color: #00000096;
+    }
+
+    #i1rsmq {
+      color: #ff7eb3;
+      font-weight: 600;
+    }
+
+    #ikb0e3 {
+      color: #00000096;
+    }
+
+    #i6lnpk {
+      color: #00000096;
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="gjs-qr-wrapper" id="ikfjmo">
+    <div class="gjs-qr-card">
+      <div class="gjs-qr-header">
+        <h2 aria-live="polite" class="gjs-qr-title">🎉 สแกนเพื่อส่งกำลังใจ 🎉</h2>
+        <p class="gjs-qr-subtitle">สแกน PromptPay QR นี้เพื่อโอนเงิน<br/>ขอบคุณสำหรับการสนับสนุนนะคะ!</p>
       </div>
-      <div style="flex-grow: 1; height: 1px; background-color: #1e293b; margin: 0 12px;"></div>
-      <div class="gjs-qr-step-item">
-        <span class="gjs-qr-step-number gjs-step-circle-2 gjs-step-active">2</span>
-        <span class="gjs-step-text-2" style="color: #f1f5f9; font-weight: 600;">รับ QR</span>
+      <div role="navigation" aria-label="ขั้นตอนการบริจาค" class="gjs-qr-steps">
+        <div class="gjs-qr-step-item">
+          <span class="gjs-qr-step-number gjs-step-inactive">1</span><span id="icco0m">กรอกข้อมูล</span></div>
+        <div class="gjs-qr-step-item">
+          <span class="gjs-qr-step-number gjs-step-active">2</span><span id="i1rsmq">รับ QR Code</span></div>
       </div>
-    </div>
-
-    <div class="gjs-qr-box">
-      <div id="qr-code-container" class="gjs-qr-canvas-wrapper">
-        <!-- SVG Canvas Elements will be programmatically injected here by qr-code-styling -->
-      </div>
-      
-      <div>
-        <p class="gjs-qr-amount-text">
-          ยอดบริจาคของคุณ: <span id="display-amount" class="gjs-qr-amount-display">0.00</span> บาท
-        </p>
-        <p class="gjs-qr-notice">
-          รูปภาพรหัสด้านบนนี้เป็นระบบชำระเงินแบบปิดที่ปลอดภัย ข้อมูลชื่อจริงและเลขบัญชีธนาคารต้นทางของคุณจะไม่ถูกส่งไปยังฐานข้อมูลหรือขึ้นแสดงหน้าสตรีมเด็ดขาดค่ะ
-        </p>
-      </div>
-
-      <button type="button" id="back-btn" class="gjs-qr-back-btn">
-        กลับไปหน้าแรกเพื่อทำรายการสนับสนุนเพิ่มเติม
+      <div class="gjs-qr-box">
+        <div id="qr-code-container" class="gjs-qr-canvas-wrapper">
+          <!-- QR Code will be injected here -->
+        </div>
+        <div>
+          <p class="gjs-qr-amount-text">ยอดสนับสนุนของคุณ</p>
+          <span id="display-amount" class="gjs-qr-amount-display">0.00 บาท</span>
+          <p class="gjs-qr-notice" id="ikb0e3">
+            ระบบชำระเงินนี้มีความปลอดภัยสูง ข้อมูลบัญชีธนาคารของคุณจะไม่ถูกบันทึกหรือแสดงผลใดๆ ทั้งสิ้นค่ะ
+          </p>
+        </div><button type="button" id="back-btn" class="gjs-qr-back-btn">
+        กลับไปหน้าแรกเพื่อทำรายการเพิ่มเติม
       </button>
+      </div>
     </div>
-
   </div>
-</div>
+</body>
+
+</html>
